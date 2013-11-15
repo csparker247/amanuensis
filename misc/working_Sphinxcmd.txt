@@ -1,0 +1,1 @@
+/Users/mediateam/source/CMUsphinx/build/bin/pocketsphinx_batch -hmm /Users/mediateam/source/CMUsphinx/build/hmm/en-us -cepdir . -ctl ctlFile.txt -cepext .wav -adcin true -hyp pocketsphinxoutput.txt

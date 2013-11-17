@@ -1,0 +1,13 @@
+Amanuensis Transcription - test_pauses
+======================================
+this is a file with long pauses
+
+
+I'm using it to test what happens when I have long pauses in the middle of my audio tracks
+
+
+do they get relegated to the end of my file
+
+
+where are they ordered chronologically
+

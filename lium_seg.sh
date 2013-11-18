@@ -32,7 +32,7 @@ fDescCLR="audio2sphinx,1:3:2:0:0:0,13,1:1:300:4"
 #show=`basename $1 .sph`
 show=`basename "$features" .wav`
 
-echo "$show"
+#echo "$show"
 
 #need JVM 1.6
 java=java
@@ -74,18 +74,19 @@ $java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MCl
 h=3
 # hierarchical clustering - disabling - amanuensis needs chronological output
 #$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MClust   --trace --help --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --sOutputMask="$datadir"/%s.h.$h.seg --cMethod=h --cThr=$h $show
+$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MClust --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --sOutputMask="$datadir"/%s.h.$h.seg --cMethod=h --cThr=$h $show
  
 # initialize GMM
 #$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MTrainInit   --help --nbComp=8 --kind=DIAG --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --tOutputMask="$datadir"/%s.init.gmms $show
-$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MTrainInit --nbComp=8 --kind=DIAG --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --tOutputMask="$datadir"/%s.init.gmms $show
+$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MTrainInit --nbComp=8 --kind=DIAG --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.h.$h.seg --tOutputMask="$datadir"/%s.init.gmms $show
  
 # EM computation
 #$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MTrainEM   --help  --nbComp=8 --kind=DIAG --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --tOutputMask="$datadir"/%s.gmms  --tInputMask="$datadir"/%s.init.gmms  $show
-$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MTrainEM --nbComp=8 --kind=DIAG --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --tOutputMask="$datadir"/%s.gmms  --tInputMask="$datadir"/%s.init.gmms  $show
+$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MTrainEM --nbComp=8 --kind=DIAG --fInputMask="$features" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.h.$h.seg --tOutputMask="$datadir"/%s.gmms  --tInputMask="$datadir"/%s.init.gmms  $show
 
 #Viterbi decoding
 #$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MDecode   --trace --help --fInputMask="${features}" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --sOutputMask="$datadir"/%s.d.$h.seg --dPenality=250  --tInputMask="$datadir"/%s.gmms $show
-$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MDecode --fInputMask="${features}" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.l.seg --sOutputMask="$datadir"/%s.d.$h.seg --dPenality=250  --tInputMask="$datadir"/%s.gmms $show
+$java -Xmx2048m -classpath "$LOCALCLASSPATH" fr.lium.spkDiarization.programs.MDecode --fInputMask="${features}" --fInputDesc=$fDesc --sInputMask="$datadir"/%s.h.$h.seg --sOutputMask="$datadir"/%s.d.$h.seg --dPenality=250  --tInputMask="$datadir"/%s.gmms $show
  
 #Adjust segment boundaries
 adjseg="$datadir"/$show.adj.$h.seg

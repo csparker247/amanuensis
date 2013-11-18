@@ -30,7 +30,7 @@ count=0
 args=${#filelist[@]}
 
 # Exit if no supported types found
-if [[ "$args" == "0" ]]; then
+if [[ "$args" == "0" || "${filelist[@]}" == "" ]]; then
 	echo "No supported file types in batch list."
 	exit 0
 fi
@@ -59,11 +59,11 @@ for (( i=1; i<=${args}; i++ )); do
 	if [[ $segmentCount == "1" ]]; then
 		times=$(ffmpeg -i "$filepath" 2>&1 | grep Duration | awk '{ print substr($2, 0, length($2)-1) }')
 	else
-		times=$(awk 'NR <= 1 {next} { printf("%s,", ($3 * .01) ); }' "$tempdir"/temp.spl.3.seg | awk '{ print substr($1, 0, length($1)-1) }')
+		times=$(awk 'NR <= 1 {next} { printf("%s\n", ($3 * .01) ); }' "$tempdir"/temp.spl.3.seg | sort -n | awk '{ printf("%s,", $1) }' | awk '{ print substr($1, 0, length($1)-1) }')
 	fi
 	
 	# Segment based on diarization times
-	ffmpeg -i "$filepath" -vn -c:a flac -ar 16000 -map a:0 -f segment -segment_times "$times" "$tempdir"/temp_%03d.flac 2> /dev/null
+	ffmpeg -i "$filepath" -vn -c:a flac -ar 16000 -map a:0 -f segment -segment_times "$times" "$tempdir"/temp_%03d.flac
 
 	# Create output transcript file
 	line="Amanuensis Transcription - $filename"
@@ -75,13 +75,13 @@ for (( i=1; i<=${args}; i++ )); do
 	# Send each segment for transcription
 	for segment in "$tempdir"/*.flac; do
 		wget -q -U "Mozilla/5.0" --post-file "$segment" --header "Content-Type: audio/x-flac; rate=16000" -O - "https://www.google.com/speech-api/v1/recognize?lang=en-us&client=chromium" | cut -d\" -f12 >> "$(dirname "$filepath")/${filename}_Transcript.txt"
-		#sleep 1
+		sleep 1
 		echo >> "$(dirname "$filepath")/${filename}_Transcript.txt"
 	done
 	
 	# Cleanup
 	echo Removing temp directory...
-	rm -rf "$tempdir"
+	#rm -rf "$tempdir"
 	
 	echo Transcriptions complete.
 	

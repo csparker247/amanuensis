@@ -51,7 +51,7 @@ for (( i=1; i<=${args}; i++ )); do
 	fi
 	
 	echo Segmenting audio stream...
-	ffmpeg -i "$filepath" -vn -ar 16000 -ac 1 -map a:0 "$tempdir"/temp.wav 2> /dev/null
+	ffmpeg -i "$filepath" -vn -ar 16000 -ac 1 -map a:0 "$tempdir"/temp.wav 2>&1 | awk '1;{fflush()}' RS='\r\n'> "$tempdir"/temp_ff_full.log
 	. lium_seg.sh
 	
 	# Read from "$tempdir"/temp.spl.3.seg
@@ -63,7 +63,7 @@ for (( i=1; i<=${args}; i++ )); do
 	fi
 	
 	# Segment based on diarization times
-	ffmpeg -i "$filepath" -vn -c:a flac -ar 16000 -map a:0 -f segment -segment_times "$times" "$tempdir"/temp_%03d.flac
+	ffmpeg -i "$filepath" -vn -c:a flac -ar 16000 -map a:0 -f segment -segment_times "$times" "$tempdir"/temp_%03d.flac 2>&1 | awk '1;{fflush()}' RS='\r\n'> "$tempdir"/temp_ff_segment.log
 
 	# Create output transcript file
 	line="Amanuensis Transcription - $filename"
@@ -74,7 +74,11 @@ for (( i=1; i<=${args}; i++ )); do
 	
 	# Send each segment for transcription
 	for segment in "$tempdir"/*.flac; do
-		wget -q -U "Mozilla/5.0" --post-file "$segment" --header "Content-Type: audio/x-flac; rate=16000" -O - "https://www.google.com/speech-api/v1/recognize?lang=en-us&client=chromium" | cut -d\" -f12 >> "$(dirname "$filepath")/${filename}_Transcript.txt"
+		curl -X POST \
+		--data-binary @"$segment" \
+		--user-agent 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.117 Safari/537.36' \
+		--header 'Content-Type: audio/x-flac; rate=16000;' \
+		'https://www.google.com/speech-api/v2/recognize?output=json&lang=en-us&key=AIzaSyCnl6MRydhw_5fLXIdASxkLJzcJh5iX0M4' >> "$(dirname "$filepath")/${filename}_Transcript.txt"
 		sleep 1
 		echo >> "$(dirname "$filepath")/${filename}_Transcript.txt"
 	done

@@ -5,6 +5,7 @@ Speech To Text Transcription via Google's S2T Engine. Uses LIAM for
 diarization and segmentation metadata. Uses ffmpeg for audio tasks.  
   
 Original idea from here: http://www.raspberrypi.org/phpBB3/viewtopic.php?uid=19416&f=38&t=27290&start=0  
+API v2 script from here: https://github.com/gillesdemey/google-speech-v2  
 LIUM Diarization based on this script: http://www-lium.univ-lemans.fr/diarization/doku.php/single-show_diarization  
   
 ##Requires:##
